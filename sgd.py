@@ -8,7 +8,6 @@ import numpy.random
 import sklearn.preprocessing
 from numpy import *
 from sklearn.datasets import fetch_mldata
-from sklearn.cross_validation import cross_val_score
 
 mnist = fetch_mldata('MNIST original', data_home='./')
 data = mnist['data']
@@ -34,16 +33,17 @@ test_data = sklearn.preprocessing.scale(test_data_unscaled, axis=0, with_std=Fal
 
 
 def sgd(samples, labels, C, n0, T):
-    w = numpy.zeros(784)
+    n, d = samples.shape
+    w = numpy.zeros(d).astype(np.float64)
 
     for t in range(1, T):
         # sample i uniformly
         i = numpy.random.randint(0, len(samples), 1)[0]
+        errors = 0
         label = labels[i]
         sample = samples[i]
         nt = n0 / t
         sign = label * numpy.dot(w, sample)
-        errors = 0
 
         if sign < 1:
             #  (1 − ηt)wt + ηtCyixi
@@ -61,7 +61,9 @@ def cross_validate(classifier, val_data, val_labels):
     for i in range(len(val_data)):
         data = val_data[i]
         label = val_labels[i]
-        if numpy.sign(numpy.dot(classifier,data)) != label:
+        sign = numpy.sign(numpy.dot(classifier, data))
+        # print(sign)
+        if sign != label:
             errors += 1
     return (len(val_data) - errors) / len(val_data)
 
@@ -86,10 +88,26 @@ def a():
     plt.scatter(ns, avg_accuracies)
     plt.xlabel('ni_0')
     plt.ylabel('Avg. Accuracy')
-    # plt.savefig('1a.png')
-    plt.show()
+    plt.savefig('1a.png')
+    # plt.show()
 
-    # plt.clf()
+    plt.clf()
+    # return classifier and best n0
+    return classifier, pow(10, avg_accuracies.index(max(avg_accuracies)))
 
 
-a()
+def b(classifier, n0):
+    avg_accuracies = []
+    cs = []
+    for c in range(-5, 5):
+        cs.append(pow(10, c))
+        accuracy = 0
+        # cross validation
+        for i in range(10):
+            accuracy += cross_validate(classifier, validation_data, validation_labels)
+
+        avg_accuracies.append(accuracy / 10)
+
+
+classifier, n0 = a()
+b(classifier), n0
