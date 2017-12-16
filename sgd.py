@@ -3,6 +3,7 @@ from __future__ import division
 import matplotlib as mpl
 
 mpl.use('Agg')
+import matplotlib.pyplot as plt
 import numpy.random
 import sklearn.preprocessing
 from numpy import *
@@ -35,41 +36,60 @@ test_data = sklearn.preprocessing.scale(test_data_unscaled, axis=0, with_std=Fal
 def sgd(samples, labels, C, n0, T):
     w = numpy.zeros(784)
 
-    for t in range(T):
+    for t in range(1, T):
         # sample i uniformly
-        i = np.random.uniform(0, 1, len(samples))
+        i = numpy.random.randint(0, len(samples), 1)[0]
         label = labels[i]
         sample = samples[i]
         nt = n0 / t
-        sign = np.sign(label, np.dot(w, sample))
+        sign = label * numpy.dot(w, sample)
         errors = 0
 
         if sign < 1:
             #  (1 − ηt)wt + ηtCyixi
-            w = np.multiply((1 - nt), w) + np.multiply(nt * C * sign, sample)
+            w = numpy.multiply((1 - nt), w) + numpy.multiply(nt * C * label, sample)
         else:
-            w = np.multiply((1 - nt), w)
+            w = numpy.multiply((1 - nt), w)
 
         if sign != label:
             errors += 1
     return w, errors
 
 
+def cross_validate(classifier, val_data, val_labels):
+    errors = 0
+    for i in range(len(val_data)):
+        data = val_data[i]
+        label = val_labels[i]
+        if numpy.sign(numpy.dot(classifier,data)) != label:
+            errors += 1
+    return (len(val_data) - errors) / len(val_data)
+
+
 def a():
     avg_accuracies = []
+    ns = []
     for n in range(-5, 5):
         n0 = pow(10, n)
+        ns.append(n0)
         # train svm
         classifier, errors = sgd(train_data, train_labels, 1, n0, 1000)
 
         accuracy = 0
         # cross validation
         for i in range(10):
-            accuracy += cross_val_score(classifier, validation_data, validation_labels, cv=5)
+            accuracy += cross_validate(classifier, validation_data, validation_labels)
 
         avg_accuracies.append(accuracy / 10)
 
     # plot
+    plt.scatter(ns, avg_accuracies)
+    plt.xlabel('ni_0')
+    plt.ylabel('Avg. Accuracy')
+    # plt.savefig('1a.png')
+    plt.show()
+
+    # plt.clf()
 
 
 a()
