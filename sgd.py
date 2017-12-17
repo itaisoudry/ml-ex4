@@ -44,13 +44,14 @@ def get_logscale():
 def sgd(samples, labels, C, n0, T):
     n, d = samples.shape
     w = numpy.zeros(d, numpy.float64)
-
+    norm_samples = samples / numpy.linalg.norm(samples)
+    errors = 0
     for t in range(1, T):
         # sample i uniformly
         i = numpy.random.randint(0, len(samples), 1)[0]
-        errors = 0
+
         label = labels[i]
-        sample = samples[i]
+        sample = norm_samples[i]
         nt = n0 / t
         sign = label * numpy.dot(w, sample)
 
@@ -67,8 +68,9 @@ def sgd(samples, labels, C, n0, T):
 
 def cross_validate(classifier, val_data, val_labels):
     errors = 0
+    val_data_norm = val_data / numpy.linalg.norm(val_data)
     for i in range(len(val_data)):
-        data = val_data[i]
+        data = val_data_norm[i]
         label = val_labels[i]
         sign = numpy.sign(numpy.dot(classifier, data))
         # print(sign)
@@ -79,8 +81,11 @@ def cross_validate(classifier, val_data, val_labels):
 
 def a():
     avg_accuracies = []
-    ns = get_logscale()
-    for n in ns:
+    ns = []
+    for i in range(-5, 6):
+        n = pow(10, i)
+        ns.append(n)
+
         accuracy = 0
         # cross validation
         for i in range(10):
@@ -98,13 +103,15 @@ def a():
     plt.clf()
 
     # return best n0
-    return pow(10, avg_accuracies.index(max(avg_accuracies)))
+    return pow(10, avg_accuracies.index(max(avg_accuracies)) - 5)
 
 
 def b(n0):
     avg_accuracies = []
-    cs = get_logscale()
-    for c in cs:
+    cs = []
+    for i in range(-5, 6):
+        c = pow(10, i)
+        cs.append(c)
         accuracy = 0
 
         # cross validation
@@ -121,7 +128,7 @@ def b(n0):
     plt.savefig('1b.png')
     plt.clf()
     # return best C
-    return pow(10, avg_accuracies.index(max(avg_accuracies)))
+    return pow(10, avg_accuracies.index(max(avg_accuracies)) - 5)
 
 
 def c(n0, c):
@@ -133,5 +140,5 @@ def c(n0, c):
 
 
 n0 = a()
-best_c = b(n0)
-c(n0, best_c)
+C = b(pow(10, n0))
+c(n0, pow(10, C))

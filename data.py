@@ -25,8 +25,8 @@ def load(train_size, test_size):
     Hence, we're using different label formats for
     the training data and the test data.  """
     f = gzip.open('./mnist.pkl.gz', 'rb')
-    # train_from_file, validation_from_file, test_from_file = pickle.load(f, encoding='iso-8859-1')
-    train_from_file, validation_from_file, test_from_file = pickle.load(f)
+    train_from_file, validation_from_file, test_from_file = pickle.load(f, encoding='iso-8859-1')
+    # train_from_file, validation_from_file, test_from_file = pickle.load(f)
     f.close()
     training_inputs = [np.reshape(x, (784, 1)) for x in train_from_file[0]]
     training_results = [vectorized_result(y) for y in train_from_file[1]]

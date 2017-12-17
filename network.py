@@ -58,8 +58,9 @@ class Network(object):
                        for b, nb in zip(self.biases, nabla_b)]
 
     def backprop(self, x, y):
-
         # TODO: Your backprop implementation.
+        n = len(x)
+        l_x_y = (1/n)*np.sum()
         return 0
 
     def one_label_accuracy(self, data):

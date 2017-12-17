@@ -9,12 +9,19 @@ learning_rate = 0.5
 mnist = input_data.read_data_sets('/tmp/tensorflow/mnist/input_data', one_hot=True)
 
 x = tf.placeholder(tf.float32, [None, 784])
-W = tf.Variable(tf.random_normal(([784, 10]), stddev=0.1))
-b = tf.Variable(tf.random_normal(([10]), stddev=0.1))
+W1 = tf.Variable(tf.random_normal(([784, 3])))
+W2 = tf.Variable(tf.random_normal(([3, 10])))
+b1 = tf.Variable(tf.random_normal(([3])))
+b2 = tf.Variable(tf.random_normal(([10])))
+
+# W = tf.Variable(tf.random_normal(([784, 10]), stddev=0.1))
+# b = tf.Variable(tf.random_normal(([10]), stddev=0.1))
 
 # Output tensor.
-y_pred = tf.matmul(x, W) + b
-
+# y_pred = tf.matmul(x, w) + b
+z1 = tf.matmul(x, W1) + b1
+a1 = tf.nn.relu(z1)
+y_pred = tf.matmul(a1, W2) + b2
 # Define loss and optimizer
 y = tf.placeholder(tf.float32, [None, 10])
 
