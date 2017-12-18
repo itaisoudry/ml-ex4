@@ -32,15 +32,6 @@ validation_data = sklearn.preprocessing.scale(validation_data_unscaled, axis=0, 
 test_data = sklearn.preprocessing.scale(test_data_unscaled, axis=0, with_std=False)
 
 
-def get_logscale():
-    scale = []
-    i = -3
-    while i <= 3:
-        scale.append(double(pow(10, i)))
-        i += 0.5
-    return scale
-
-
 def sgd(samples, labels, C, n0, T):
     n, d = samples.shape
     w = numpy.zeros(d, numpy.float64)
@@ -86,7 +77,7 @@ def a():
 
         accuracy = 0
         # cross validation
-        for i in range(10):
+        for j in range(10):
             # train svm
             classifier = sgd(train_data, train_labels, 1, n, 1000)
             accuracy += cross_validate(classifier, validation_data, validation_labels)
@@ -94,7 +85,11 @@ def a():
         avg_accuracies.append(accuracy / 10)
 
     # plot
+    axes = plt.gca()
+    axes.set_xlim(ns[0], ns[-1])
+    axes.set_ylim(min(avg_accuracies), max(avg_accuracies))
     plt.scatter(ns, avg_accuracies)
+    plt.semilogx(ns)
     plt.xlabel('ni_0')
     plt.ylabel('Avg. Accuracy')
     plt.savefig('1a.png')
@@ -113,7 +108,7 @@ def b(n0):
         accuracy = 0
 
         # cross validation
-        for i in range(10):
+        for j in range(10):
             classifier = sgd(train_data, train_labels, c, n0, 1000)
             accuracy += cross_validate(classifier, validation_data, validation_labels)
 
@@ -121,9 +116,10 @@ def b(n0):
 
     # plot
     axes = plt.gca()
-    axes.set_xlim(min(cs), max(cs))
+    axes.set_xlim(cs[0], cs[-1])
     axes.set_ylim(min(avg_accuracies), max(avg_accuracies))
     plt.scatter(cs, avg_accuracies)
+    plt.semilogx(cs)
     plt.xlabel('C')
     plt.ylabel('Avg. Accuracy')
     plt.savefig('1b.png')
