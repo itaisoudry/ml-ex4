@@ -59,6 +59,7 @@ class Network(object):
 
     def backprop(self, x, y):
         # TODO: Your backprop implementation.
+        W = self.weights
         n = len(x)
         l_x_y = (1/n)*np.sum()
         return 0
