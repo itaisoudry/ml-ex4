@@ -44,8 +44,8 @@ def get_logscale():
 def sgd(samples, labels, C, n0, T):
     n, d = samples.shape
     w = numpy.zeros(d, numpy.float64)
-    norm_samples = samples / numpy.linalg.norm(samples)
-    errors = 0
+    norm_samples = numpy.divide(samples, numpy.linalg.norm(samples))
+
     for t in range(1, T):
         # sample i uniformly
         i = numpy.random.randint(0, len(samples), 1)[0]
@@ -53,22 +53,20 @@ def sgd(samples, labels, C, n0, T):
         label = labels[i]
         sample = norm_samples[i]
         nt = n0 / t
-        sign = label * numpy.dot(w, sample)
+        res = label * numpy.dot(w, sample)
 
-        if sign < 1:
+        if res < 1:
             #  (1 − ηt)wt + ηtCyixi
             w = numpy.multiply((1 - nt), w) + numpy.multiply(nt * C * label, sample)
         else:
             w = numpy.multiply((1 - nt), w)
 
-        if sign != label:
-            errors += 1
-    return w, errors
+    return w
 
 
 def cross_validate(classifier, val_data, val_labels):
     errors = 0
-    val_data_norm = val_data / numpy.linalg.norm(val_data)
+    val_data_norm = numpy.divide(val_data, numpy.linalg.norm(val_data))
     for i in range(len(val_data)):
         data = val_data_norm[i]
         label = val_labels[i]
@@ -90,7 +88,7 @@ def a():
         # cross validation
         for i in range(10):
             # train svm
-            classifier, errors = sgd(train_data, train_labels, 1, n, 1000)
+            classifier = sgd(train_data, train_labels, 1, n, 1000)
             accuracy += cross_validate(classifier, validation_data, validation_labels)
 
         avg_accuracies.append(accuracy / 10)
@@ -116,12 +114,15 @@ def b(n0):
 
         # cross validation
         for i in range(10):
-            classifier, errors = sgd(train_data, train_labels, c, n0, 1000)
+            classifier = sgd(train_data, train_labels, c, n0, 1000)
             accuracy += cross_validate(classifier, validation_data, validation_labels)
 
         avg_accuracies.append(accuracy / 10)
 
     # plot
+    axes = plt.gca()
+    axes.set_xlim(min(cs), max(cs))
+    axes.set_ylim(min(avg_accuracies), max(avg_accuracies))
     plt.scatter(cs, avg_accuracies)
     plt.xlabel('C')
     plt.ylabel('Avg. Accuracy')
@@ -132,13 +133,16 @@ def b(n0):
 
 
 def c(n0, c):
-    classifier, errors = sgd(train_data, train_labels, c, n0, 20000)
+    classifier = sgd(train_data, train_labels, c, n0, 20000)
     plt.imshow(reshape(classifier, (28, 28)), interpolation='nearest')
     plt.savefig('1c.png')
     plt.clf()
-    print('Best classifier accuracy on the test set:', (len(test_data) - errors) / len(test_data))
+    accuracy = cross_validate(classifier, test_data, test_labels)
+    print('Best classifier accuracy on the test set:', accuracy)
 
 
 n0 = a()
-C = b(pow(10, n0))
-c(n0, pow(10, C))
+print('best n0:', n0)
+C = b(n0)
+print('best c:', C)
+c(n0, C)
