@@ -71,7 +71,7 @@ def cross_validate(classifier, val_data, val_labels):
 def a():
     avg_accuracies = []
     ns = []
-    for i in range(-5, 6):
+    for i in range(-5, 4):
         n = pow(10, i)
         ns.append(n)
 
@@ -102,7 +102,7 @@ def a():
 def b(n0):
     avg_accuracies = []
     cs = []
-    for i in range(-5, 6):
+    for i in range(-5, 10):
         c = pow(10, i)
         cs.append(c)
         accuracy = 0
