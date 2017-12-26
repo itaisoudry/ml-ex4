@@ -15,7 +15,7 @@ def b():
     epochs = list(range(0, 30))
     test_accuracy,training_accuracy,training_loss=net.SGD(training_data, 30, 10, 0.1, test_data)
 
-    plt.scatter(epochs, test_accuracy)
+    plt.plot(epochs, test_accuracy)
     plt.xlabel("Epochs")
     plt.ylabel("Test Accuracy")
     plt.savefig('2bTestAcc.png')
