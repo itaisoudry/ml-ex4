@@ -58,11 +58,36 @@ class Network(object):
                        for b, nb in zip(self.biases, nabla_b)]
 
     def backprop(self, x, y):
-        # TODO: Your backprop implementation.
-        W = self.weights
-        n = len(x)
-        l_x_y = (1/n)*np.sum()
-        return 0
+        num_layers = self.num_layers
+        sizes = self.sizes
+        weights = self.weights
+        biases = self.biases
+
+        # init a
+        a = [np.zeros((b, 1)) for b in sizes]
+        # init z
+        z = [np.zeros((b, 1)) for b in sizes]
+        # init error
+        error = [np.zeros(b.shape) for b in biases]
+        w = [np.zeros(w.shape) for w in weights]
+        z[0] = x
+        a[0] = x
+
+        # calculate a and z
+        for i in range(1, num_layers - 1):
+            z[i] = weights[i - 1].dot(a[i - 1]) + biases[i - 1]
+            a[i] = sigmoid(z[i])
+
+        z[num_layers - 1] = weights[num_layers - 2].dot(a[num_layers - 2]) + biases[num_layers - 2]
+        error[num_layers - 2] = self.loss_derivative_wr_output_activations(z[num_layers - 1], y)
+        # calculate error
+        for i in range(num_layers - 3, -1, -1):
+            error[i] = np.multiply((weights[i + 1].T.dot(error[i + 1])), (sigmoid_derivative(z[i + 1])))
+        gradient = error
+        for i in range(0, num_layers - 1):
+            w[i] = np.multiply(error[i], a[i].T)
+        else:
+            return gradient, w
 
     def one_label_accuracy(self, data):
         """Return accuracy of network on data with numeric labels"""
