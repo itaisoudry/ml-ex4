@@ -9,16 +9,13 @@ import numpy.random
 import numpy as np
 
 
-
 def b():
     training_data, test_data = data.load(train_size=10000, test_size=5000)
     net = network.Network([784, 40, 10])
     epochs = list(range(0, 30))
-    accuracy = net.SGD(training_data, epochs, 10, 0.1, test_data)
-    training_loss = net.loss
-    training_accuracy = net.one_label_accuracy(training_data)
+    test_accuracy,training_accuracy,training_loss=net.SGD(training_data, 30, 10, 0.1, test_data)
 
-    plt.plot(epochs, accuracy)
+    plt.scatter(epochs, test_accuracy)
     plt.xlabel("Epochs")
     plt.ylabel("Test Accuracy")
     plt.savefig('2bTestAcc.png')
@@ -71,6 +68,6 @@ def d():
     plt.clf()
 
 
-# b()
-c()
-d()
+b()
+# c()
+# d()

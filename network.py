@@ -1,7 +1,7 @@
 """
 network.py
 """
-
+from __future__ import division
 import random
 
 import numpy as np
@@ -33,6 +33,9 @@ class Network(object):
         outputs.  """
         print("Initial test accuracy: {0}".format(self.one_label_accuracy(test_data)))
         n = len(training_data)
+        test_accuracy = []
+        training_accuracy = []
+        training_loss = []
         for j in range(epochs):
             random.shuffle(list(training_data))
             mini_batches = [
@@ -40,7 +43,11 @@ class Network(object):
                 for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, learning_rate)
+            training_accuracy.append(self.one_hot_accuracy(training_data))
+            training_loss.append(self.loss(training_data))
+            test_accuracy.append(self.one_label_accuracy(test_data))
             print("Epoch {0} test accuracy: {1}".format(j, self.one_label_accuracy(test_data)))
+        return test_accuracy, training_accuracy, training_loss
 
     def update_mini_batch(self, mini_batch, learning_rate):
         """Update the network's weights and biases by applying
