@@ -26,7 +26,7 @@ class Network(object):
                         for x, y in zip(sizes[:-1], sizes[1:])]
 
     def SGD(self, training_data, epochs, mini_batch_size, learning_rate,
-            test_data):
+            test_data, section_d):
         """Train the neural network using mini-batch stochastic
         gradient descent.  The ``training_data`` is a list of tuples
         ``(x, y)`` representing the training inputs and the desired
@@ -36,33 +36,47 @@ class Network(object):
         test_accuracy = []
         training_accuracy = []
         training_loss = []
+
+        # init bi's norm matrix
+        norm_bis = np.zeros((epochs, self.num_layers-1))
         for j in range(epochs):
             random.shuffle(list(training_data))
             mini_batches = [
                 training_data[k:k + mini_batch_size]
                 for k in range(0, n, mini_batch_size)]
+            # update bi's norm matrix
             for mini_batch in mini_batches:
-                self.update_mini_batch(mini_batch, learning_rate)
+                norm_bis[j] = self.update_mini_batch(mini_batch, learning_rate, section_d)
+
+            # set accuracies and loss
             training_accuracy.append(self.one_hot_accuracy(training_data))
             training_loss.append(self.loss(training_data))
             test_accuracy.append(self.one_label_accuracy(test_data))
             print("Epoch {0} test accuracy: {1}".format(j, self.one_label_accuracy(test_data)))
-        return test_accuracy, training_accuracy, training_loss
+        return test_accuracy, training_accuracy, training_loss, norm_bis
 
-    def update_mini_batch(self, mini_batch, learning_rate):
+    def update_mini_batch(self, mini_batch, learning_rate, section_d):
         """Update the network's weights and biases by applying
         stochastic gradient descent using backpropagation to a single mini batch.
         The ``mini_batch`` is a list of tuples ``(x, y)``."""
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
+        # avg_b = [np.zeros(b.shape) for b in self.biases]
+        bi_norm = (self.num_layers - 1) * [0]
+
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
+            if section_d:
+                for k in range(self.num_layers - 1):
+                    bi_norm[k] += 1.0 / (len(mini_batch)) * np.linalg.norm(delta_nabla_b[k])
+                    # avg_b = np.add(avg_b, delta_nabla_b)
             nabla_b = [nb + dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw + dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
         self.weights = [w - (learning_rate / len(mini_batch)) * nw
                         for w, nw in zip(self.weights, nabla_w)]
         self.biases = [b - (learning_rate / len(mini_batch)) * nb
                        for b, nb in zip(self.biases, nabla_b)]
+        return bi_norm
 
     def backprop(self, x, y):
         num_layers = self.num_layers
